@@ -15,6 +15,20 @@ class Loccle < Formula
     end
     (bin/"loccle").write <<~EOS
       #!/bin/bash
+      case "$1" in
+        --version|-v)
+          node -e "console.log(require('#{libexec}/package.json').version)"
+          exit 0
+          ;;
+        --help|-h)
+          echo "Usage: loccle [options]"
+          echo ""
+          echo "Options:"
+          echo "  -v, --version  Show version number"
+          echo "  -h, --help     Show this help message"
+          exit 0
+          ;;
+      esac
       cd "#{libexec}" && exec bun "#{libexec}/bin/mastra-tui.ts" -- "$@"
     EOS
     chmod 0755, bin/"loccle"
