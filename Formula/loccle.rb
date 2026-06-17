@@ -10,9 +10,12 @@ class Loccle < Formula
 
   def install
     libexec.install Dir["*"]
+    cd libexec do
+      system "bun", "install", "--production"
+    end
     (bin/"loccle").write <<~EOS
       #!/bin/bash
-      exec bun run "#{libexec}/bin/mastra-tui.ts" "$@"
+      cd "#{libexec}" && exec bun run "#{libexec}/bin/mastra-tui.ts" "$@"
     EOS
     chmod 0755, bin/"loccle"
   end
