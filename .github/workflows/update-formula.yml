@@ -1,0 +1,49 @@
+name: Update formula on npm publish
+
+on:
+  schedule:
+    - cron: '0 * * * *'
+  workflow_dispatch: {}
+
+permissions:
+  contents: write
+
+jobs:
+  update:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Get current formula version
+        id: current
+        run: |
+          ver=$(ruby -e "puts Formula['loccle'].url.match(/loccle-(\d+\.\d+\.\d+)\.tgz/)[1]" Formula/loccle.rb)
+          echo "version=$ver" >> $GITHUB_OUTPUT
+
+      - name: Get latest npm version
+        id: npm
+        run: |
+          ver=$(npm view loccle version 2>/dev/null)
+          echo "version=$ver" >> $GITHUB_OUTPUT
+
+      - name: Update formula if new version
+        if: steps.current.outputs.version != steps.npm.outputs.version
+        run: |
+          NEW="${{ steps.npm.outputs.version }}"
+          URL="https://registry.npmjs.org/loccle/-/loccle-${NEW}.tgz"
+          SHA=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
+          echo "New version: $NEW"
+          echo "SHA256: $SHA"
+          OLD=$(ruby -e "puts Formula['loccle'].url.match(/loccle-(\d+\.\d+\.\d+)\.tgz/)[1]" Formula/loccle.rb)
+          sed -i "s|loccle-${OLD}.tgz|loccle-${NEW}.tgz|" Formula/loccle.rb
+          sed -i "s|sha256 \".*\"|sha256 \"${SHA}\"|" Formula/loccle.rb
+          echo "updated=true" >> $GITHUB_OUTPUT
+
+      - name: Commit and push
+        if: steps.update.outputs.updated == 'true'
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add Formula/loccle.rb
+          git commit -m "chore: update to loccle ${{ steps.npm.outputs.version }}"
+          git push
