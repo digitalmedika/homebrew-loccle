@@ -1,35 +1,22 @@
 class Loccle < Formula
   desc "Terminal UI for Loccle powered by Mastra and OpenTUI"
   homepage "https://github.com/digitalmedika/mastra-tui"
-  url "https://registry.npmjs.org/loccle/-/loccle-1.0.17.tgz"
-  sha256 "fd62052b0a89e2a7318574ecf9c57113e6957903e593d4c8b8578bd71c3379e4"
+  url "https://registry.npmjs.org/loccle/-/loccle-1.0.18.tgz"
+  sha256 "cfbff6377a691c9ab7bac21b992b9aa6346e738bd4120378c557140acd9fca13"
   license "MIT"
 
-  depends_on "bun"
+  preserve_rpath
+
   depends_on "node"
 
   def install
     libexec.install Dir["*"]
     cd libexec do
-      system "bun", "install", "--production"
+      system "npm", "install", "--omit=dev", "--ignore-scripts"
     end
     (bin/"loccle").write <<~EOS
       #!/bin/bash
-      case "$1" in
-        --version|-v)
-          node -e "console.log(require('#{libexec}/package.json').version)"
-          exit 0
-          ;;
-        --help|-h)
-          echo "Usage: loccle [options]"
-          echo ""
-          echo "Options:"
-          echo "  -v, --version  Show version number"
-          echo "  -h, --help     Show this help message"
-          exit 0
-          ;;
-      esac
-      cd "#{libexec}" && exec bun "#{libexec}/bin/mastra-tui.ts" -- "$@"
+      exec node "#{libexec}/dist/tui/cli.js" "$@"
     EOS
     chmod 0755, bin/"loccle"
   end
