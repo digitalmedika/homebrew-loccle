@@ -15,7 +15,7 @@ class Loccle < Formula
     end
     (bin/"loccle").write <<~EOS
       #!/bin/bash
-      cd "#{libexec}" && exec bun run "#{libexec}/bin/mastra-tui.ts" "$@"
+      cd "#{libexec}" && exec bun "#{libexec}/bin/mastra-tui.ts" "$@"
     EOS
     chmod 0755, bin/"loccle"
   end
