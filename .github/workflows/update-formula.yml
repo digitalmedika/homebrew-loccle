@@ -17,7 +17,7 @@ jobs:
       - name: Get current formula version
         id: current
         run: |
-          ver=$(ruby -e "puts Formula['loccle'].url.match(/loccle-(\d+\.\d+\.\d+)\.tgz/)[1]" Formula/loccle.rb)
+          ver=$(ruby -ne 'puts $1 if /loccle-(\d+\.\d+\.\d+)\.tgz/' Formula/loccle.rb)
           echo "version=$ver" >> $GITHUB_OUTPUT
 
       - name: Get latest npm version
@@ -27,6 +27,7 @@ jobs:
           echo "version=$ver" >> $GITHUB_OUTPUT
 
       - name: Update formula if new version
+        id: update
         if: steps.current.outputs.version != steps.npm.outputs.version
         run: |
           NEW="${{ steps.npm.outputs.version }}"
@@ -34,7 +35,7 @@ jobs:
           SHA=$(curl -sL "$URL" | sha256sum | cut -d' ' -f1)
           echo "New version: $NEW"
           echo "SHA256: $SHA"
-          OLD=$(ruby -e "puts Formula['loccle'].url.match(/loccle-(\d+\.\d+\.\d+)\.tgz/)[1]" Formula/loccle.rb)
+          OLD="${{ steps.current.outputs.version }}"
           sed -i "s|loccle-${OLD}.tgz|loccle-${NEW}.tgz|" Formula/loccle.rb
           sed -i "s|sha256 \".*\"|sha256 \"${SHA}\"|" Formula/loccle.rb
           echo "updated=true" >> $GITHUB_OUTPUT
