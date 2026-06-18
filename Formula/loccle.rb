@@ -1,8 +1,8 @@
 class Loccle < Formula
   desc "Terminal UI for Loccle powered by Mastra and OpenTUI"
   homepage "https://github.com/digitalmedika/mastra-tui"
-  url "https://registry.npmjs.org/loccle/-/loccle-1.0.19.tgz"
-  sha256 "0365c0c30386c3307e152bb47828dde905356f5bb842ae0e305a68576db5dd01"
+  url "https://registry.npmjs.org/loccle/-/loccle-1.0.20.tgz"
+  sha256 "8066681ff3b4409655d16235374224f9e81129207fa953ca1d5f9fb3ab78ad53"
   license "MIT"
 
   preserve_rpath
